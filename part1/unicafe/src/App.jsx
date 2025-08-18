@@ -37,11 +37,14 @@ const Button = ({ onClick, text }) => (
 )
 
 const Stats = ({clicks}) => {
+  const totalClicks = clicks.good + clicks.neutral + clicks.bad
   return (
     <div>
       <p>good {clicks.good}</p>
       <p>neutral {clicks.neutral}</p>
       <p>bad {clicks.bad}</p>
+      <p>average {(clicks.good - clicks.bad) / totalClicks}</p>
+      <p>positive {((clicks.good / totalClicks) * 100)} %</p>
     </div>
   )
 }
