@@ -29,6 +29,9 @@ const App = () => {
         text="vote"
       />
       <Button onClick = {() => setSelected(Math.floor(Math.random() * anecdotes.length))} text="next anecdote" />
+      <h1>Anecdote with most votes</h1>
+      {anecdotes[votes.indexOf(Math.max(...votes))]}
+      <p>has {Math.max(...votes)} votes</p>
     </div>
   )
 }
