@@ -38,6 +38,7 @@ const Button = ({ onClick, text }) => (
 
 const Stats = ({clicks}) => {
   const totalClicks = clicks.good + clicks.neutral + clicks.bad
+  if (totalClicks === 0) return <p>No feedback given</p>
   return (
     <div>
       <p>good {clicks.good}</p>
