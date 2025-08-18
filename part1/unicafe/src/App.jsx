@@ -41,13 +41,17 @@ const Stats = ({clicks}) => {
   if (totalClicks === 0) return <p>No feedback given</p>
   return (
     <div>
-      <p>good {clicks.good}</p>
-      <p>neutral {clicks.neutral}</p>
-      <p>bad {clicks.bad}</p>
-      <p>average {(clicks.good - clicks.bad) / totalClicks}</p>
-      <p>positive {((clicks.good / totalClicks) * 100)} %</p>
+      <StatisticLine text="good" value={clicks.good} />
+      <StatisticLine text="neutral" value={clicks.neutral} />
+      <StatisticLine text="bad" value={clicks.bad} />
+      <StatisticLine text="average" value={(clicks.good - clicks.bad) / totalClicks} />
+      <StatisticLine text="positive" value={clicks.good / totalClicks * 100 + ' %'} />
     </div>
   )
 }
+
+const StatisticLine = ({ text, value}) => (
+  <p>{text} {value}</p>
+)
 
 export default App
