@@ -3,6 +3,9 @@ import Filter from './components/Filter.jsx'
 import Person from './components/Person.jsx'
 import AddPersonForm from './components/addPersonForm.jsx'
 import personService from './services/persons.jsx'
+import './index.css'
+import Added from './components/Added.jsx'
+import Deleted from './components/Deleted.jsx'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -11,6 +14,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const hook = () => {
     personService
@@ -35,23 +40,39 @@ const App = () => {
             setNewName('')
             setNewNumber('')
           })
+          .catch(error => {
+            console.log(error)
+            setErrorMessage(`Information of ${newName} has already been removed from server`)
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 5000)
+            setPersons(persons.filter(p => p.id !== personToUpdate.id))
+          })
       }
     return  
   }
 
-  const personObject = { 
-  name: newName,
-  number: newNumber,
-}
-
-  personService
-    .create(personObject)
-    .then(response => {
-      setPersons(persons.concat(response.data))
-      setNewName('')
-      setNewNumber('')
-      })
+    const personObject = { 
+    name: newName,
+    number: newNumber,
   }
+
+    personService
+      .create(personObject)
+      .then(response => {
+        setPersons(persons.concat(response.data))
+        setNewName('')
+        setNewNumber('')
+        })
+
+    setSuccessMessage(`Added ${newName}`)
+    setTimeout(() => {
+      setSuccessMessage(null)
+    }, 5000)
+    setNewName('')
+    setNewNumber('')
+  }
+
   const removePerson = (id) => {
     personService
       .deletePerson(id)
@@ -75,6 +96,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Deleted message={errorMessage} />
+      <Added message={successMessage} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>Add new</h2>
       <AddPersonForm 
