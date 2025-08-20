@@ -59,7 +59,7 @@ app.post("/api/persons", (request, response) => {
   const newid = Math.floor(Math.random() * 1000);
   const body = request.body;
 
-  if (!body.name || body.number) {
+  if (!body.name || !body.number) {
     response.status(400);
     return response.json({ error: "missing either name or number" });
   }
