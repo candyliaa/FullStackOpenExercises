@@ -4,6 +4,7 @@ const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
+app.use(morgan(":method :url :body"));
 
 let persons = [
   {
@@ -76,6 +77,10 @@ app.post("/api/persons", (request, response) => {
   persons = persons.concat(newPerson);
 
   response.json(newPerson);
+
+  morgan.token("body", (request) => {
+    return JSON.stringify(request.body);
+  });
 });
 
 const PORT = 3001;
