@@ -1,6 +1,8 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+require("dotenv").config();
+const Person = require("./models/person");
 
 const app = express();
 
@@ -33,7 +35,11 @@ let persons = [
 ];
 
 app.get("/api/persons", (request, response) => {
-  response.json(persons);
+  Person.find({}).then((result) => {
+    result.forEach((person) => {
+      console.log(person);
+    });
+  });
 });
 
 app.get("/info", (request, response) => {
@@ -62,7 +68,6 @@ app.delete("/api/persons/:id", (request, response) => {
 });
 
 app.post("/api/persons", (request, response) => {
-  const newid = Math.floor(Math.random() * 1000);
   const body = request.body;
 
   if (!body.name || !body.number) {
@@ -76,17 +81,21 @@ app.post("/api/persons", (request, response) => {
     return response.json({ error: "person already exists" });
   }
 
-  const newPerson = { id: newid, name: body.name, number: body.number };
-  persons = persons.concat(newPerson);
+  const newPerson = new Person({
+    name: body.name,
+    number: body.number,
+  });
 
-  response.json(newPerson);
+  newPerson.save().then((savedPerson) => {
+    response.json(savedPerson);
+  });
 
   morgan.token("body", (request) => {
     return JSON.stringify(request.body);
   });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
