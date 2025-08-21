@@ -1,3 +1,6 @@
+const Person = require("./models/person");
+const mongoose = require("mongoose");
+
 if (process.argv.length === 4) {
   console.log("password is missing");
   process.exit(1);
