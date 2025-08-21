@@ -39,6 +39,7 @@ app.get("/api/persons", (request, response) => {
     result.forEach((person) => {
       console.log(person);
     });
+    response.json(result);
   });
 });
 
@@ -52,19 +53,24 @@ app.get("/info", (request, response) => {
 
 app.get("/api/persons/:id", (request, response) => {
   const id = request.params.id;
-  const person = persons.find((person) => person.id === id);
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(204).end();
-  }
+  Person.findById(id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (request, response) => {
   const id = request.params.id;
-  persons = persons.filter((person) => person.id !== id);
-
-  response.status(204).end();
+  Person.findByIdAndDelete(id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", (request, response) => {
