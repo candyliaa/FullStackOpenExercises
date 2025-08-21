@@ -1,5 +1,5 @@
 const Deleted = ({ message }) => {
-    if (message === null) {
+    if (!message) {
         return null
     }
 

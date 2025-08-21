@@ -1,5 +1,5 @@
 const Added = ({ message }) => {
-    if (message === null) {
+    if (!message) {
         return null
     }
 

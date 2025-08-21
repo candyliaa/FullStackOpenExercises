@@ -28,50 +28,54 @@ const App = () => {
   useEffect(hook, [])
 
   const addPerson = (event) => {
-    event.preventDefault()
-    if (persons.find(p => p.name === newName)) {
-      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        const personToUpdate = persons.find(p => p.name === newName)
-        const updatedPerson = { ...personToUpdate, number: newNumber }
-        personService
-          .update(personToUpdate.id, updatedPerson)
-          .then(response => { 
-            setPersons(persons.map(p => p.id !== personToUpdate.id ? p : response.data))
-            setNewName('')
-            setNewNumber('')
-          })
-          .catch(error => {
-            console.log(error)
-            setErrorMessage(`Information of ${newName} has already been removed from server`)
-            setTimeout(() => {
-              setErrorMessage(null)
-            }, 5000)
-            setPersons(persons.filter(p => p.id !== personToUpdate.id))
-          })
-      }
-    return  
+  event.preventDefault();
+
+  const personObject = { name: newName, number: newNumber };
+
+  if (personObject.name.length < 3) {
+    setErrorMessage("Name must be at least 3 characters long")
+    setTimeout(() => setErrorMessage(null), 5000)
+    return;
   }
 
-    const personObject = { 
-    name: newName,
-    number: newNumber,
-  }
-
-    personService
-      .create(personObject)
-      .then(response => {
-        setPersons(persons.concat(response.data))
-        setNewName('')
-        setNewNumber('')
+  const existing = persons.find(p => p.name === newName);
+  if (existing) {
+    if (window.confirm(`${newName} is already added, replace the number?`)) {
+      const updatedPerson = { ...existing, number: newNumber };
+      personService
+        .update(existing.id, updatedPerson)
+        .then(response => {
+          setPersons(previous => previous.map(p => p.id !== existing.id ? p : response.data));
+          setSuccessMessage(`Updated ${response.data.name}'s number`);
+          setTimeout(() => setSuccessMessage(null), 5000);
         })
-
-    setSuccessMessage(`Added ${newName}`)
-    setTimeout(() => {
-      setSuccessMessage(null)
-    }, 5000)
-    setNewName('')
-    setNewNumber('')
+        .catch(error => {
+          console.log(error)
+          setErrorMessage(`Information of ${newName} has already been removed`);
+          setPersons(previous => previous.filter(p => p.id !== existing.id));
+          setTimeout(() => setErrorMessage(null), 5000);
+        });
+    }
+    return;
   }
+
+  personService
+    .create(personObject)
+    .then(response => {
+      setPersons(previous => previous.concat(response.data));
+      setNewName('');
+      setNewNumber('');
+      setSuccessMessage(`Added ${response.data.name}`);
+      setErrorMessage(null)
+      setTimeout(() => setSuccessMessage(null), 5000);
+    })
+    .catch(error => {
+      console.error(error);
+      setErrorMessage(error.response.data.error);
+      setSuccessMessage(null)
+      setTimeout(() => setErrorMessage(null), 5000);
+    });
+};
 
   const removePerson = (id) => {
     personService
