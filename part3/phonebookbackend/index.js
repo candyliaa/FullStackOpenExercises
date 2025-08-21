@@ -72,10 +72,6 @@ app.post("/api/persons", (request, response, next) => {
       response.json(savedPerson);
     })
     .catch((error) => next(error));
-
-  morgan.token("body", (request) => {
-    return JSON.stringify(request.body);
-  });
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
