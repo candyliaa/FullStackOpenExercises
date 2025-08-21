@@ -4,8 +4,7 @@ import Person from './components/Person.jsx'
 import AddPersonForm from './components/addPersonForm.jsx'
 import personService from './services/persons.jsx'
 import './index.css'
-import Added from './components/Added.jsx'
-import Deleted from './components/Deleted.jsx'
+import Message from "./components/Message.jsx"
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -14,8 +13,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
-  const [successMessage, setSuccessMessage] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [notification, setNotification] = useState(null)
 
   const hook = () => {
     personService
@@ -33,8 +31,8 @@ const App = () => {
   const personObject = { name: newName, number: newNumber };
 
   if (personObject.name.length < 3) {
-    setErrorMessage("Name must be at least 3 characters long")
-    setTimeout(() => setErrorMessage(null), 5000)
+    setNotification("error: Name must be at least 3 characters long")
+    setTimeout(() => setNotification(null), 5000)
     return;
   }
 
@@ -46,14 +44,14 @@ const App = () => {
         .update(existing.id, updatedPerson)
         .then(response => {
           setPersons(previous => previous.map(p => p.id !== existing.id ? p : response.data));
-          setSuccessMessage(`Updated ${response.data.name}'s number`);
-          setTimeout(() => setSuccessMessage(null), 5000);
+          setNotification(`Updated ${response.data.name}'s number`);
+          setTimeout(() => setNotification(null), 5000);
         })
         .catch(error => {
           console.log(error)
-          setErrorMessage(`Information of ${newName} has already been removed`);
+          setNotification(`error: Information of ${newName} has already been removed`);
           setPersons(previous => previous.filter(p => p.id !== existing.id));
-          setTimeout(() => setErrorMessage(null), 5000);
+          setTimeout(() => setNotification(null), 5000);
         });
     }
     return;
@@ -65,15 +63,14 @@ const App = () => {
       setPersons(previous => previous.concat(response.data));
       setNewName('');
       setNewNumber('');
-      setSuccessMessage(`Added ${response.data.name}`);
-      setErrorMessage(null)
-      setTimeout(() => setSuccessMessage(null), 5000);
+      setNotification(`Added ${response.data.name}`);
+      setTimeout(() => setNotification(null), 5000);
     })
     .catch(error => {
       console.error(error);
-      setErrorMessage(error.response.data.error);
-      setSuccessMessage(null)
-      setTimeout(() => setErrorMessage(null), 5000);
+      const errorMessage = error.response?.data?.error || error.message || "Unknown error";
+      setNotification(`error: ${errorMessage}`);
+      setTimeout(() => setNotification(null), 5000);
     });
 };
 
@@ -100,8 +97,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Deleted message={errorMessage} />
-      <Added message={successMessage} />
+      <Message notification={notification} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>Add new</h2>
       <AddPersonForm 
