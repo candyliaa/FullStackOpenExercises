@@ -81,12 +81,6 @@ app.post("/api/persons", (request, response) => {
     return response.json({ error: "missing either name or number" });
   }
 
-  const person = persons.find((person) => person.name === body.name);
-  if (person) {
-    response.status(400);
-    return response.json({ error: "person already exists" });
-  }
-
   const newPerson = new Person({
     name: body.name,
     number: body.number,
@@ -99,6 +93,26 @@ app.post("/api/persons", (request, response) => {
   morgan.token("body", (request) => {
     return JSON.stringify(request.body);
   });
+});
+
+app.put("/api/persons/:id", (request, response, next) => {
+  const body = request.body;
+
+  Person.findByIdAndUpdate(
+    request.params.id,
+    {
+      name: body.name,
+      number: body.number,
+    },
+    { new: true, runValidators: true, context: "query" }
+  )
+    .then((person) => {
+      if (!person) {
+        return response.status(404).json({ error: "person not found" });
+      }
+      response.json(person);
+    })
+    .catch(next);
 });
 
 const unknownEndpoint = (request, response) => {
