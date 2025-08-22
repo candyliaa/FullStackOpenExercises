@@ -1,18 +1,18 @@
-const mongoose = require("mongoose");
+const blogsRouter = require("express").Router();
+const Blog = require("../models/blog");
 
-const blogSchema = mongoose.Schema({
-  title: String,
-  author: String,
-  url: String,
-  likes: Number,
+blogsRouter.get("/", (request, response) => {
+  Blog.find({}).then((blogs) => {
+    response.json(blogs);
+  });
 });
 
-blogSchema.set("toJSON", {
-  transform: (document, returnedObjet) => {
-    returnedObjet.id = returnedObjet._id.toString();
-    delete returnedObject._id;
-    delete returnedObjet.__v;
-  },
+blogsRouter.post("/blogs", (request, response) => {
+  const blog = new Blog(request.body);
+
+  blog.save().then((result) => {
+    response.status(201).json(result);
+  });
 });
 
-module.exports = mongoose.model("Blog", blogSchema);
+module.exports = blogsRouter;
