@@ -4,6 +4,7 @@ const supertest = require("supertest");
 const app = require("../app");
 const Blog = require("../models/blog");
 const assert = require("node:assert");
+const blog = require("../models/blog");
 
 const api = supertest(app);
 
@@ -41,6 +42,12 @@ test("blogs are returned as json", async () => {
 test("all blogs are returned", async () => {
   const response = await api.get("/api/blogs");
   assert.strictEqual(response.body.length, initialBlogs.length);
+});
+
+test("id property is named id", async () => {
+  const blogs = await Blog.find({});
+  assert.ok(blogs[0].id, "blog has id field");
+  assert.strictEqual(blog._id, undefined, "blog shouldn't have _id field");
 });
 
 after(async () => {
