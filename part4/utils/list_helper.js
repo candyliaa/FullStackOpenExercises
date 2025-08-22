@@ -8,7 +8,22 @@ const totalLikes = (blogs) => {
   return total;
 };
 
+const favoriteBlog = (blogs) => {
+  currentBiggest = null;
+  blogs.forEach((blog) => {
+    if (!currentBiggest) {
+      currentBiggest = blog;
+    } else {
+      if (currentBiggest.likes < blog.likes) {
+        currentBiggest = blog;
+      }
+    }
+  });
+  return currentBiggest;
+};
+
 module.exports = {
   dummy,
   totalLikes,
+  favoriteBlog,
 };
