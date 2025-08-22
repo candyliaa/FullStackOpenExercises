@@ -10,20 +10,16 @@ const api = supertest(app);
 
 const initialBlogs = [
   {
-    _id: "5a422aa71b54a676234d17f8",
     title: "Go To Statement Considered Harmful",
     author: "Edsger W. Dijkstra",
     url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
     likes: 5,
-    __v: 0,
   },
   {
-    _id: "5a422aa71b54a676234d17f9",
     title: "Bachelor's CS at University of Helsinki",
     author: "Studious Student",
     url: "https://studies.cs.helsinki.fi/",
     likes: 10,
-    __v: 0,
   },
 ];
 
@@ -70,6 +66,23 @@ test("new blog can be created", async () => {
   const titles = response.body.map((r) => r.title);
   assert.strictEqual(response.body.length, initialBlogs.length + 1);
   assert(titles.includes("Test Blog"));
+});
+
+test("if likes is missing from request, it's set to zero", async () => {
+  const newBlog = {
+    title: "No likes",
+    author: "Studious Student",
+    url: "https://studies.cs.helsinki.fi/",
+  };
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  const response = await api.get("/api/blogs");
+  const blog = response.body.find((b) => b.title === "No likes");
+  assert.strictEqual(blog.likes, 0);
 });
 
 after(async () => {
