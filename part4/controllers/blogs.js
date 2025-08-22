@@ -12,9 +12,14 @@ blogsRouter.get("/", async (request, response) => {
 
 blogsRouter.post("/", async (request, response) => {
   const blog = new Blog(request.body);
-  if (!Object.hasOwn(blog, "likes")) {
+
+  if (!blog.title || !blog.url) {
+    response.status(400).end();
+  }
+  if (!blog.likes) {
     blog.likes = 0;
   }
+
   const savedBlog = await blog.save();
   response.status(201).json(savedBlog);
 });
