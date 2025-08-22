@@ -120,6 +120,27 @@ describe("blogs can be deleted", () => {
   });
 });
 
+describe("blogs can be updated", () => {
+  test("blog likes can be updated", async () => {
+    const id = "5a422aa71b54a676234d17f8";
+
+    const blogToBeUpdated = await Blog.findById(id);
+    const updatedBlog = {
+      ...blogToBeUpdated,
+      likes: 69,
+    };
+
+    await api
+      .put(`/api/blogs/${id}`)
+      .send(updatedBlog)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    const updated = await Blog.findById(id);
+    assert.strictEqual(updated.likes, 69);
+  });
+});
+
 after(async () => {
   await mongoose.connection.close();
 });
