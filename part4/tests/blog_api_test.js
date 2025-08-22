@@ -50,6 +50,28 @@ test("id property is named id", async () => {
   assert.strictEqual(blog._id, undefined, "blog shouldn't have _id field");
 });
 
+test("new blog can be created", async () => {
+  const newBlog = {
+    _id: "5a422aa71b54a676234d17f2",
+    title: "Test Blog",
+    author: "Test Author",
+    url: "https://example.com",
+    likes: 10,
+    __v: 0,
+  };
+
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  const response = await api.get("/api/blogs");
+  const titles = response.body.map((r) => r.title);
+  assert.strictEqual(response.body.length, initialBlogs.length + 1);
+  assert(titles.includes("Test Blog"));
+});
+
 after(async () => {
   await mongoose.connection.close();
 });
