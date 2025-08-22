@@ -1,4 +1,4 @@
-const { test, after, beforeEach } = require("node:test");
+const { test, after, beforeEach, describe } = require("node:test");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
@@ -32,81 +32,92 @@ beforeEach(async () => {
   await Blog.insertMany(initialBlogs);
 });
 
-test("blogs are returned as json", async () => {
-  await api
-    .get("/api/blogs")
-    .expect(200)
-    .expect("Content-Type", /application\/json/);
+describe("blogs are fetched correctly", () => {
+  test("blogs are returned as json", async () => {
+    await api
+      .get("/api/blogs")
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+  });
+
+  test("all blogs are returned", async () => {
+    const response = await api.get("/api/blogs");
+    assert.strictEqual(response.body.length, initialBlogs.length);
+  });
+
+  test("id property is named id", async () => {
+    const blogs = await Blog.find({});
+    assert.ok(blogs[0].id, "blog has id field");
+    assert.strictEqual(blog._id, undefined, "blog shouldn't have _id field");
+  });
 });
 
-test("all blogs are returned", async () => {
-  const response = await api.get("/api/blogs");
-  assert.strictEqual(response.body.length, initialBlogs.length);
+describe("blogs are created correctly", () => {
+  test("new blog can be created", async () => {
+    const newBlog = {
+      _id: "5a422aa71b54a676234d17f2",
+      title: "Test Blog",
+      author: "Test Author",
+      url: "https://example.com",
+      likes: 10,
+      __v: 0,
+    };
+
+    await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const response = await api.get("/api/blogs");
+    const titles = response.body.map((r) => r.title);
+    assert.strictEqual(response.body.length, initialBlogs.length + 1);
+    assert(titles.includes("Test Blog"));
+  });
+
+  test("if likes is missing from request, it's set to zero", async () => {
+    const newBlog = {
+      _id: "5a422aa71b54a676234d17f4",
+      title: "No likes",
+      author: "Studious Student",
+      url: "https://studies.cs.helsinki.fi/",
+      __v: 0,
+    };
+    await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const response = await api.get("/api/blogs");
+    const blog = response.body.find((b) => b.title === "No likes");
+    assert.strictEqual(blog.likes, 0);
+  });
+
+  test("blog with missing url returns 400", async () => {
+    const noUrlBlog = {
+      title: "URLs are a mystery",
+      author: "I don't know what a url is",
+    };
+
+    await api.post("/api/blogs").send(noUrlBlog).expect(400);
+  });
+
+  test("blog with missing title returns 400", async () => {
+    const noTitleBlog = {
+      author: "I don't know what a title is",
+      url: "https://google.com",
+    };
+
+    await api.post("/api/blogs").send(noTitleBlog).expect(400);
+  });
 });
 
-test("id property is named id", async () => {
-  const blogs = await Blog.find({});
-  assert.ok(blogs[0].id, "blog has id field");
-  assert.strictEqual(blog._id, undefined, "blog shouldn't have _id field");
-});
-
-test("new blog can be created", async () => {
-  const newBlog = {
-    _id: "5a422aa71b54a676234d17f2",
-    title: "Test Blog",
-    author: "Test Author",
-    url: "https://example.com",
-    likes: 10,
-    __v: 0,
-  };
-
-  await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(201)
-    .expect("Content-Type", /application\/json/);
-
-  const response = await api.get("/api/blogs");
-  const titles = response.body.map((r) => r.title);
-  assert.strictEqual(response.body.length, initialBlogs.length + 1);
-  assert(titles.includes("Test Blog"));
-});
-
-test("if likes is missing from request, it's set to zero", async () => {
-  const newBlog = {
-    _id: "5a422aa71b54a676234d17f4",
-    title: "No likes",
-    author: "Studious Student",
-    url: "https://studies.cs.helsinki.fi/",
-    __v: 0,
-  };
-  await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(201)
-    .expect("Content-Type", /application\/json/);
-
-  const response = await api.get("/api/blogs");
-  const blog = response.body.find((b) => b.title === "No likes");
-  assert.strictEqual(blog.likes, 0);
-});
-
-test("blog with missing url returns 400", async () => {
-  const noUrlBlog = {
-    title: "URLs are a mystery",
-    author: "I don't know what a url is",
-  };
-
-  await api.post("/api/blogs").send(noUrlBlog).expect(400);
-});
-
-test("blog with missing title returns 400", async () => {
-  const noTitleBlog = {
-    author: "I don't know what a title is",
-    url: "https://google.com",
-  };
-
-  await api.post("/api/blogs").send(noTitleBlog).expect(400);
+describe("blogs can be deleted", () => {
+  test("blog can be deleted", async () => {
+    const id = "5a422aa71b54a676234d17f8";
+    await api.delete(`/api/blogs/${id}`).expect(204);
+  });
 });
 
 after(async () => {
