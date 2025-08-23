@@ -5,8 +5,43 @@ const app = require("../app");
 const Blog = require("../models/blog");
 const assert = require("node:assert");
 const User = require("../models/user");
+const config = require("../utils/config");
+const jwt = require("jsonwebtoken");
 
 const api = supertest(app);
+
+let token;
+let userId;
+
+const initialBlogs = [
+  {
+    _id: "5a422aa71b54a676234d17f8",
+    title: "Go To Statement Considered Harmful",
+    author: "Edsger W. Dijkstra",
+    url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+    likes: 5,
+    __v: 0,
+    user: null,
+  },
+  {
+    _id: "5a422aa71b54a676234d17f9",
+    title: "Bachelor's CS at University of Helsinki",
+    author: "Studious Student",
+    url: "https://studies.cs.helsinki.fi/",
+    likes: 10,
+    __v: 0,
+    user: null,
+  },
+  {
+    _id: "5a422aa71b54a676234d17f5",
+    title: "This blog should probably be deleted",
+    author: "Studious Student",
+    url: "https://studies.cs.helsinki.fi/",
+    likes: 10,
+    __v: 0,
+    user: null,
+  },
+];
 
 const initialUsers = [
   {
@@ -25,31 +60,50 @@ const initialUsers = [
   },
 ];
 
-const initialBlogs = [
-  {
-    _id: "5a422aa71b54a676234d17f8",
-    title: "Go To Statement Considered Harmful",
-    author: "Edsger W. Dijkstra",
-    url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-    likes: 5,
-    __v: 0,
-  },
-  {
-    _id: "5a422aa71b54a676234d17f9",
-    title: "Bachelor's CS at University of Helsinki",
-    author: "Studious Student",
-    url: "https://studies.cs.helsinki.fi/",
-    likes: 10,
-    __v: 0,
-  },
-];
-
 beforeEach(async () => {
   await Blog.deleteMany({});
-  await Blog.insertMany(initialBlogs);
 
   await User.deleteMany({});
+  const user = await User.create({
+    username: "userWhoDeletes",
+    passwordHash: "hashedPassword",
+  });
+
+  userId = user._id.toString();
+
+  token = jwt.sign({ username: user.username, id: userId }, config.SECRET);
+
   await User.insertMany(initialUsers);
+
+  const initialBlogs = [
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+    {
+      _id: "5a422aa71b54a676234d17f9",
+      title: "Bachelor's CS at University of Helsinki",
+      author: "Studious Student",
+      url: "https://studies.cs.helsinki.fi/",
+      likes: 10,
+      __v: 0,
+    },
+    {
+      _id: "5a422aa71b54a676234d17f5",
+      title: "This blog should probably be deleted",
+      author: "Studious Student",
+      url: "https://studies.cs.helsinki.fi/",
+      user: user._id,
+      likes: 10,
+      __v: 0,
+    },
+  ];
+
+  await Blog.insertMany(initialBlogs);
 });
 
 describe("blogs are fetched correctly", () => {
@@ -88,6 +142,7 @@ describe("blogs are created correctly", () => {
 
     await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -109,6 +164,7 @@ describe("blogs are created correctly", () => {
     };
     await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -125,7 +181,11 @@ describe("blogs are created correctly", () => {
       userId: "5a422aa71b54a676234d17f2",
     };
 
-    await api.post("/api/blogs").send(noUrlBlog).expect(400);
+    await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
+      .send(noUrlBlog)
+      .expect(400);
   });
 
   test("blog with missing title returns 400", async () => {
@@ -135,20 +195,27 @@ describe("blogs are created correctly", () => {
       userId: "5a422aa71b54a676234d17f2",
     };
 
-    await api.post("/api/blogs").send(noTitleBlog).expect(400);
+    await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
+      .send(noTitleBlog)
+      .expect(400);
   });
 });
 
 describe("blogs can be deleted", () => {
   test("blog can be deleted", async () => {
-    const id = "5a422aa71b54a676234d17f8";
-    await api.delete(`/api/blogs/${id}`).expect(204);
+    const id = "5a422aa71b54a676234d17f5";
+    await api
+      .delete(`/api/blogs/${id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(204);
   });
 });
 
 describe("blogs can be updated", () => {
   test("blog likes can be updated", async () => {
-    const id = "5a422aa71b54a676234d17f8";
+    const id = "5a422aa71b54a676234d17f9";
 
     const blogToBeUpdated = await Blog.findById(id);
     const updatedBlog = {
