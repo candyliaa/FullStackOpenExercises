@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const usersRouter = require("express").Router();
 const User = require("../models/user");
 
-usersRouter.get("/", async (request, response) => {
+usersRouter.get("/", async (req, response) => {
   const users = await User.find({}).populate("blogs", {
     title: 1,
     url: 1,
@@ -10,7 +10,7 @@ usersRouter.get("/", async (request, response) => {
   });
 
   if (users) {
-    response.status(200).json(users);
+    response.status(200).json(users.map((u) => u.toJSON()));
   } else {
     response.status(404).end();
   }
