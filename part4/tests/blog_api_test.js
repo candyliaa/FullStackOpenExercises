@@ -4,9 +4,26 @@ const supertest = require("supertest");
 const app = require("../app");
 const Blog = require("../models/blog");
 const assert = require("node:assert");
-const blog = require("../models/blog");
+const User = require("../models/user");
 
 const api = supertest(app);
+
+const initialUsers = [
+  {
+    _id: "5a422aa71b54a676234d17f1",
+    username: "root",
+    name: "Root Person",
+    password: "secret",
+    __v: 0,
+  },
+  {
+    _id: "5a422aa71b54a676234d17f2",
+    username: "root2",
+    name: "Root Person",
+    password: "secret",
+    __v: 0,
+  },
+];
 
 const initialBlogs = [
   {
@@ -30,6 +47,9 @@ const initialBlogs = [
 beforeEach(async () => {
   await Blog.deleteMany({});
   await Blog.insertMany(initialBlogs);
+
+  await User.deleteMany({});
+  await User.insertMany(initialUsers);
 });
 
 describe("blogs are fetched correctly", () => {
@@ -46,8 +66,10 @@ describe("blogs are fetched correctly", () => {
   });
 
   test("id property is named id", async () => {
-    const blogs = await Blog.find({});
-    assert.ok(blogs[0].id, "blog has id field");
+    const response = await api.get("/api/blogs");
+    const blog = response.body[0];
+
+    assert.ok(blog.id, "blog has id field");
     assert.strictEqual(blog._id, undefined, "blog shouldn't have _id field");
   });
 });
@@ -60,6 +82,7 @@ describe("blogs are created correctly", () => {
       author: "Test Author",
       url: "https://example.com",
       likes: 10,
+      userId: "5a422aa71b54a676234d17f2",
       __v: 0,
     };
 
@@ -81,6 +104,7 @@ describe("blogs are created correctly", () => {
       title: "No likes",
       author: "Studious Student",
       url: "https://studies.cs.helsinki.fi/",
+      userId: "5a422aa71b54a676234d17f2",
       __v: 0,
     };
     await api
@@ -98,6 +122,7 @@ describe("blogs are created correctly", () => {
     const noUrlBlog = {
       title: "URLs are a mystery",
       author: "I don't know what a url is",
+      userId: "5a422aa71b54a676234d17f2",
     };
 
     await api.post("/api/blogs").send(noUrlBlog).expect(400);
@@ -107,6 +132,7 @@ describe("blogs are created correctly", () => {
     const noTitleBlog = {
       author: "I don't know what a title is",
       url: "https://google.com",
+      userId: "5a422aa71b54a676234d17f2",
     };
 
     await api.post("/api/blogs").send(noTitleBlog).expect(400);

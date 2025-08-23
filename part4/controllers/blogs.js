@@ -1,9 +1,10 @@
 const blogsRouter = require("express").Router();
 const { application } = require("express");
 const Blog = require("../models/blog");
+const User = require("../models/user");
 
 blogsRouter.get("/", async (request, response) => {
-  const blogs = await Blog.find({});
+  const blogs = await Blog.find({}).populate("user", { username: 1, name: 1 });
   if (blogs) {
     response.status(200).json(blogs);
   } else {
@@ -12,16 +13,31 @@ blogsRouter.get("/", async (request, response) => {
 });
 
 blogsRouter.post("/", async (request, response) => {
-  const blog = new Blog(request.body);
+  const body = request.body;
 
-  if (!blog.title || !blog.url) {
+  const user = await User.findById(body.userId);
+
+  if (!user) {
+    return response.status(400).json({ error: "userId missing or not valid" });
+  }
+
+  if (!body.title || !body.url) {
     response.status(400).end();
   }
-  if (!blog.likes) {
-    blog.likes = 0;
+  if (!body.likes) {
+    body.likes = 0;
   }
 
+  const blog = new Blog({
+    title: body.title,
+    url: body.url,
+    likes: body.likes,
+    user: user._id,
+  });
+
   const savedBlog = await blog.save();
+  user.blogs = user.blogs.concat(savedBlog._id);
+  await user.save();
   response.status(201).json(savedBlog);
 });
 
