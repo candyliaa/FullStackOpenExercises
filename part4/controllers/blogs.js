@@ -1,9 +1,7 @@
 const blogsRouter = require("express").Router();
-const { application } = require("express");
 const Blog = require("../models/blog");
+const middleware = require("../utils/middleware");
 const User = require("../models/user");
-const jwt = require("jsonwebtoken");
-const config = require("../utils/config");
 
 blogsRouter.get("/", async (request, response) => {
   const blogs = await Blog.find({}).populate("user", { username: 1, name: 1 });
@@ -14,15 +12,10 @@ blogsRouter.get("/", async (request, response) => {
   }
 });
 
-blogsRouter.post("/", async (request, response) => {
+blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
   const body = request.body;
 
-  const decodedToken = jwt.verify(request.token, config.SECRET);
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: "invalid token" });
-  }
-
-  const user = await User.findById(decodedToken.id);
+  const user = await User.findById(request.user.id);
 
   if (!user) {
     return response.status(400).json({ error: "userId missing or not valid" });
@@ -70,24 +63,29 @@ blogsRouter.put("/:id", async (request, response) => {
   response.status(200).json(updatedBlog);
 });
 
-blogsRouter.delete("/:id", async (request, response) => {
-  const id = request.params.id;
+blogsRouter.delete(
+  "/:id",
+  middleware.userExtractor,
+  async (request, response) => {
+    const id = request.params.id;
 
-  const decodedToken = jwt.verify(request.token, config.SECRET);
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: "invalid token" });
+    const user = request.user;
+
+    if (!user || !user.id) {
+      return response.status(401).json({ error: "invalid or missing token" });
+    }
+
+    const blog = await Blog.findById(id);
+    if (!blog) return response.status(404).end();
+
+    if (blog.user.toString() !== user.id.toString()) {
+      return response
+        .status(403)
+        .json({ error: "can't delete: not the creator" });
+    }
+    await Blog.findByIdAndDelete(id);
+    response.status(204).end();
   }
-
-  const blog = await Blog.findById(id);
-  if (!blog) return response.status(404).end();
-
-  if (blog.user.toString() !== decodedToken.id.toString()) {
-    return response
-      .status(403)
-      .json({ error: "can't delete: not the creator" });
-  }
-  await Blog.findByIdAndDelete(id);
-  response.status(204).end();
-});
+);
 
 module.exports = blogsRouter;
