@@ -22,7 +22,7 @@ blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
   }
 
   if (!body.title || !body.url) {
-    response.status(400).end();
+    return response.status(400).end();
   }
   if (!body.likes) {
     body.likes = 0;
@@ -30,6 +30,7 @@ blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
 
   const blog = new Blog({
     title: body.title,
+    author: body.author,
     url: body.url,
     likes: body.likes,
     user: user._id,
