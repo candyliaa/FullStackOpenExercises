@@ -3,6 +3,7 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from "./services/login"
 import Notification from "./components/Notification"
+import './index.css'
 
 const App = () => {
   const [username, setUsername] = useState("")
@@ -38,17 +39,19 @@ const App = () => {
       url: newBlogUrl
     }
 
-  try {
-    const returnedBlog = await blogService.create(blogObject)
-    setBlogs(blogs.concat(returnedBlog))
-    setNewBlogTitle("")
-    setNewBlogAuthor("")
-    setNewBlogUrl("")
-  } catch (error) {
-    console.error("unable to create blog:", error.response?.data || error.message)
-    setMessage("blog missing either title or url")
-    setTimeout(() => setMessage(null), 5000)
-  }
+    try {
+      const returnedBlog = await blogService.create(blogObject)
+      setBlogs(blogs.concat(returnedBlog))
+      setMessage(`a new blog ${newBlogTitle} by ${newBlogAuthor} added`)
+      setTimeout(() => setMessage(null), 5000)
+      setNewBlogTitle("")
+      setNewBlogAuthor("")
+      setNewBlogUrl("")
+    } catch (error) {
+      console.error("unable to create blog:", error.response?.data || error.message)
+      setMessage("error: blog missing either title or url")
+      setTimeout(() => setMessage(null), 5000)
+    }
 
   }
 
@@ -76,8 +79,9 @@ const App = () => {
       setUser(user)
       setUsername("")
       setPassword("")
-    } catch {
-      setMessage("wrong credentials")
+    } catch (error) {
+      console.error(error.response?.data || error.message)
+      setMessage("error: wrong username or password")
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -156,6 +160,7 @@ const App = () => {
   if (user === null) {
     return (
       <div>
+        <Notification message={message} />
         <h2>Log in to application</h2>
         {loginForm()}
       </div>
