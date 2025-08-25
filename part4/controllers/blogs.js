@@ -61,7 +61,8 @@ blogsRouter.put("/:id", async (request, response) => {
       runValidators: true,
       context: "query",
     }
-  );
+  ).populate("user", { username: 1, name: 1 });
+
   if (!updatedBlog) return response.status(404).end();
 
   response.status(200).json(updatedBlog);
