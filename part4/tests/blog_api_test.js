@@ -83,6 +83,7 @@ beforeEach(async () => {
       url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
       likes: 5,
       __v: 0,
+      user: null,
     },
     {
       _id: "5a422aa71b54a676234d17f9",
@@ -91,6 +92,7 @@ beforeEach(async () => {
       url: "https://studies.cs.helsinki.fi/",
       likes: 10,
       __v: 0,
+      user: null,
     },
     {
       _id: "5a422aa71b54a676234d17f5",
@@ -100,6 +102,7 @@ beforeEach(async () => {
       user: user._id,
       likes: 10,
       __v: 0,
+      user: null,
     },
   ];
 
