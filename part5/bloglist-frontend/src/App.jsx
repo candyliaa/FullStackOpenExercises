@@ -3,6 +3,8 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from "./services/login"
 import Notification from "./components/Notification"
+import BlogForm from "./components/BlogForm"
+import Togglable from "./components/Togglable"
 import './index.css'
 
 const App = () => {
@@ -120,25 +122,17 @@ const App = () => {
   )
 
   const blogForm = () => (
-    <form onSubmit={addBlog}>
-      <label>
-        title
-        <input value={newBlogTitle} onChange={handleBlogTitleChange} />
-      </label>
-      
-      <br/>
-      <label>
-        author
-        <input value={newBlogAuthor} onChange={handleBlogAuthorChange} />
-      </label>
-      <br/>
-      <label>
-        url
-        <input value={newBlogUrl} onChange={handleBlogUrlChange} />
-      </label>
-      <br/>
-      <button type="submit">save</button>
-    </form>
+    <Togglable buttonLabel="new blog">
+      <BlogForm
+        onSubmit={addBlog}
+        newBlogTitle={newBlogTitle}
+        newBlogAuthor={newBlogAuthor}
+        newBlogUrl={newBlogUrl}
+        handleBlogTitleChange={handleBlogTitleChange}
+        handleBlogAuthorChange={handleBlogAuthorChange}
+        handleBlogUrlChange={handleBlogUrlChange}
+        />
+    </Togglable>
   )
 
   const showBlogs = () => (
