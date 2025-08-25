@@ -32,7 +32,7 @@ const Blog = ({ blog, setBlogs, blogs, setMessage }) => {
         setBlogs(blogs.filter(b => b.id !== blog.id))
         setMessage(`deleted blog ${blog.title} by ${blog.author}`)
       } catch (error) {
-        setMessage(`error: can't delete blog`)
+        setMessage("error: can't delete blog")
         console.error("couldn't delete blog:", error)
       }
     }
@@ -41,7 +41,7 @@ const Blog = ({ blog, setBlogs, blogs, setMessage }) => {
   return (
     <div style={blogStyle}>
       <div>
-      {blog.title} by {blog.author}
+        {blog.title} by {blog.author}
         <button onClick={toggleVisibility}>
           {visible ? "hide" : "view"}
         </button>
@@ -54,8 +54,8 @@ const Blog = ({ blog, setBlogs, blogs, setMessage }) => {
             <button onClick={handleLike}>like</button>
           </p>
           {blog.user
-          ? <p>{blog.user.name || blog.user.username}</p>
-          : <p>unknown user</p>
+            ? <p>{blog.user.name || blog.user.username}</p>
+            : <p>unknown user</p>
           }
           <button onClick={handleDelete}>delete</button>
         </div>

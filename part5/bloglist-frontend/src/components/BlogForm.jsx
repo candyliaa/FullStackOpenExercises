@@ -1,5 +1,5 @@
-  const BlogForm = ({onSubmit, newBlogTitle, newBlogAuthor, newBlogUrl, handleBlogTitleChange, handleBlogAuthorChange, handleBlogUrlChange}) => {
-    return (
+const BlogForm = ({ onSubmit, newBlogTitle, newBlogAuthor, newBlogUrl, handleBlogTitleChange, handleBlogAuthorChange, handleBlogUrlChange }) => {
+  return (
     <form onSubmit={onSubmit}>
       <label>
         title
@@ -18,7 +18,7 @@
       <br/>
       <button type="submit">save</button>
     </form>
-    )
-  }
+  )
+}
 
 export default BlogForm

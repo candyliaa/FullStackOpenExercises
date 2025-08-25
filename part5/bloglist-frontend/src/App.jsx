@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
-import Blog from './components/Blog'
-import blogService from './services/blogs'
+import { useState, useEffect } from "react"
+import Blog from "./components/Blog"
+import blogService from "./services/blogs"
 import loginService from "./services/login"
 import Notification from "./components/Notification"
 import BlogForm from "./components/BlogForm"
 import Togglable from "./components/Togglable"
-import './index.css'
+import "./index.css"
 
 const App = () => {
   const [username, setUsername] = useState("")
@@ -21,7 +21,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs.sort((a, b) => b.likes - a.likes) )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -99,7 +99,7 @@ const App = () => {
     <form onSubmit={handleLogin}>
       <div>
         <label>
-          username 
+          username
           <input
             type="text"
             value={username}
@@ -109,7 +109,7 @@ const App = () => {
       </div>
       <div>
         <label>
-          password  
+          password
           <input
             type="password"
             value={password}
@@ -131,7 +131,7 @@ const App = () => {
         handleBlogTitleChange={handleBlogTitleChange}
         handleBlogAuthorChange={handleBlogAuthorChange}
         handleBlogUrlChange={handleBlogUrlChange}
-        />
+      />
     </Togglable>
   )
 
