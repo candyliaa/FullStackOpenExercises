@@ -69,6 +69,15 @@ const App = () => {
     setNewBlogUrl(event.target.value)
   }
 
+  const handleLike = async (blog) => {
+    try {
+      const updatedBlog = await blogService.updateLikes(blog.id, blog.likes + 1)
+      setBlogs(blogs.map(b => (b.id !== blog.id ? b : updatedBlog)))
+    } catch (error) {
+      console.error("couldn't like blog:", error)
+    }
+  }
+
   const handleLogin = async event => {
     event.preventDefault()
 
@@ -140,7 +149,7 @@ const App = () => {
       <h2>blogs</h2>
       <p>{user.name} logged in</p>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} setMessage={setMessage} />
+        <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} setMessage={setMessage} handleLike={handleLike} />
       )}
     </div>
   )
