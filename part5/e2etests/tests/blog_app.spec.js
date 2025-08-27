@@ -11,7 +11,7 @@ describe("Blog app", () => {
         password: "secret",
       },
     });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "networkidle" });
   });
 
   test("login form is shown", async ({ page }) => {
