@@ -50,5 +50,17 @@ describe("Blog app", () => {
       await blogDiv.getByRole("button", { name: "like" }).click();
       await expect(blogDiv).toContainText("1 likes");
     });
+
+    test("blog can be deleted by user who created blog", async ({ page }) => {
+      await createBlog(page, "Test Blog", "Test Author", "https://example.com");
+      const blogDiv = page.locator(".blog", { hasText: "Test Blog" });
+
+      await blogDiv.getByRole("button", { name: "view" }).click();
+
+      page.on("dialog", (dialog) => dialog.accept());
+      await blogDiv.getByRole("button", { name: "delete" }).click();
+
+      await expect(blogDiv).toHaveCount(0);
+    });
   });
 });
