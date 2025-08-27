@@ -33,18 +33,11 @@ const App = () => {
     }
   }, [])
 
-  const addBlog = async (event) => {
-    event.preventDefault()
-    const blogObject = {
-      title:  newBlogTitle,
-      author: newBlogAuthor,
-      url: newBlogUrl
-    }
-
+  const addBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(returnedBlog))
-      setMessage(`a new blog ${newBlogTitle} by ${newBlogAuthor} added`)
+      setMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
       setTimeout(() => setMessage(null), 5000)
       setNewBlogTitle("")
       setNewBlogAuthor("")
@@ -54,7 +47,6 @@ const App = () => {
       setMessage("error: blog missing either title or url")
       setTimeout(() => setMessage(null), 5000)
     }
-
   }
 
   const handleBlogTitleChange = async event => {
@@ -145,7 +137,7 @@ const App = () => {
   )
 
   const showBlogs = () => (
-    <div>
+    <div className="blog-list">
       <h2>blogs</h2>
       <p>{user.name} logged in</p>
       {blogs.map(blog =>

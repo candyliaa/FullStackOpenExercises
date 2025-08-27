@@ -47,10 +47,12 @@ export default defineConfig({
       use: { ...devices["Desktop Firefox"] },
     },
 
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
+    // I decided against using webkit, as both logging and creating blogs seemed to be a 50/50 chance of working.
+
+    // {
+    //  name: "webkit",
+    //  use: { ...devices["Desktop Safari"] },
+    // },
 
     /* Test against mobile viewports. */
     // {

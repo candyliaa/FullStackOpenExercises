@@ -1,5 +1,5 @@
 const { test, describe, expect, beforeEach } = require("@playwright/test");
-const { loginWith } = require("./helper");
+const { loginWith, createBlog } = require("./helper");
 
 describe("Blog app", () => {
   beforeEach(async ({ page, request }) => {
@@ -29,6 +29,18 @@ describe("Blog app", () => {
       await loginWith(page, "root", "not a password");
       const errorDiv = page.locator(".error");
       await expect(errorDiv).toContainText("error: wrong username or password");
+    });
+  });
+
+  describe("When logged in", async () => {
+    beforeEach(async ({ page }) => {
+      await loginWith(page, "root", "secret");
+    });
+
+    test("a new blog can be created", async ({ page }) => {
+      await createBlog(page, "Test Blog", "Test Author", "https://example.com");
+      const blogsDiv = page.locator(".blog-list");
+      await expect(blogsDiv).toContainText("Test Blog");
     });
   });
 });
