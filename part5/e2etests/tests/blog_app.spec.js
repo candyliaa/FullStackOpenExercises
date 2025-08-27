@@ -11,6 +11,13 @@ describe("Blog app", () => {
         password: "secret",
       },
     });
+    await request.post("/api/users", {
+      data: {
+        username: "root2",
+        name: "Root Person2",
+        password: "secret",
+      },
+    });
     await page.goto("/", { waitUntil: "networkidle" });
   });
 
@@ -61,6 +68,21 @@ describe("Blog app", () => {
       await blogDiv.getByRole("button", { name: "delete" }).click();
 
       await expect(blogDiv).toHaveCount(0);
+    });
+
+    test("delete button only shown to user who created", async ({ page }) => {
+      await createBlog(page, "Test Blog", "Test Author", "https://example.com");
+
+      await page.getByRole("button", { name: "log out" }).click();
+      await loginWith(page, "root2", "secret");
+
+      const blogDiv = page.locator(".blog", { hasText: "Test Blog" });
+
+      await blogDiv.getByRole("button", { name: "view" }).click();
+
+      await expect(
+        blogDiv.getByRole("button", { name: "delete" })
+      ).not.toBeVisible(0);
     });
   });
 });
