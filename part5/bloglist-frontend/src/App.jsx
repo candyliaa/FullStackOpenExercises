@@ -40,7 +40,7 @@ const App = () => {
   const addBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.create(blogObject)
-      setBlogs(blogs.concat(returnedBlog))
+      setSortedBlogs(blogs.concat(returnedBlog))
       setMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
       setTimeout(() => setMessage(null), 5000)
       setNewBlogTitle("")
@@ -51,6 +51,10 @@ const App = () => {
       setMessage("error: blog missing either title or url")
       setTimeout(() => setMessage(null), 5000)
     }
+  }
+
+  const setSortedBlogs = (blogs) => {
+    setBlogs(blogs.sort((a, b) => b.likes - a.likes))
   }
 
   const handleBlogTitleChange = async event => {
@@ -70,7 +74,7 @@ const App = () => {
       const blogId = blog.id || blog._id;
       const newLikes = (blog.likes || 0) + 1;
       const updatedBlog = await blogService.updateLikes(blogId, newLikes)
-      setBlogs(blogs.map(b => (b.id !== blog.id ? b : updatedBlog)))
+      setSortedBlogs(blogs.map(b => (b.id !== blog.id ? b : updatedBlog)))
     } catch (error) {
       console.error("couldn't like blog:", error)
     }
@@ -147,7 +151,7 @@ const App = () => {
       <h2>blogs</h2>
       <p>{user.name} logged in</p>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} setMessage={setMessage} handleLike={handleLike} />
+        <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setSortedBlogs} setMessage={setMessage} handleLike={handleLike} user={user} />
       )}
     </div>
   )

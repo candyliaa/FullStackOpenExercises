@@ -84,5 +84,51 @@ describe("Blog app", () => {
         blogDiv.getByRole("button", { name: "delete" })
       ).not.toBeVisible(0);
     });
+
+    test("blogs are sorted in order of likes", async ({ page }) => {
+      await createBlog(
+        page,
+        "Test Blog1",
+        "Test Author",
+        "https://example.com"
+      );
+      await createBlog(
+        page,
+        "Test Blog2",
+        "Test Author2",
+        "https://example.com"
+      );
+      await createBlog(
+        page,
+        "Test Blog3",
+        "Test Author3",
+        "https://example.com"
+      );
+      const blog1 = page.locator(".blog", { hasText: "Test blog2" });
+      await blog1.waitFor({ state: "visible" });
+
+      await blog1.getByRole("button", { name: "view" }).click();
+      await blog1.getByRole("button", { name: "like" }).click();
+      await blog1.getByRole("button", { name: "like" }).click();
+
+      const blog2 = page.locator(".blog", { hasText: "Test Blog1" });
+      await blog2.waitFor({ state: "visible" });
+
+      await blog2.getByRole("button", { name: "view" }).click();
+      await blog2.getByRole("button", { name: "like" }).click();
+
+      await page.getByRole("button", { name: "log out" }).click();
+      await loginWith(page, "root", "secret");
+
+      await page.locator(".blog").first().waitFor({ state: "visible" });
+
+      const blogTitles = await page.$$eval(".blog .blog-summary", (blogs) =>
+        blogs.map((b) => b.textContent)
+      );
+
+      expect(blogTitles[0]).toContain("Test Blog2");
+      expect(blogTitles[1]).toContain("Test Blog");
+      expect(blogTitles[2]).toContain("Test Blog3");
+    });
   });
 });

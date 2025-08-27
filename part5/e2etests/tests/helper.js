@@ -12,6 +12,7 @@ const createBlog = async (page, title, author, url) => {
   await page.getByLabel("author").fill(author);
   await page.getByLabel("url").fill(url);
   await page.getByRole("button", { name: "save" }).click();
+  await page.getByRole("button", { name: "cancel" }).click();
 
   const blog = page.locator(".blog", { hasText: title });
   await expect(blog).toBeVisible({ timeout: 10000 });
