@@ -1,0 +1,17 @@
+{
+  "name": "e2etests",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {    
+    "test": "playwright test" 
+  },
+  "devDependencies": {
+
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.0"
+  }
+}
