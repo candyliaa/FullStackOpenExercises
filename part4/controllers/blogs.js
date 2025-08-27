@@ -58,7 +58,6 @@ blogsRouter.put("/:id", async (request, response) => {
     { likes },
     {
       new: true,
-      runValidators: true,
       context: "query",
     }
   ).populate("user", { username: 1, name: 1 });

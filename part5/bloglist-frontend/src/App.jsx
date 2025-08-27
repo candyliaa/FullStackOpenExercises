@@ -20,7 +20,11 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs.sort((a, b) => b.likes - a.likes) )
+      setBlogs(
+        blogs
+          .map(b => ({ ...b, id: b.id || b._id.toString() }))
+          .sort((a, b) => b.likes - a.likes)
+      )
     )
   }, [])
 
@@ -63,7 +67,9 @@ const App = () => {
 
   const handleLike = async (blog) => {
     try {
-      const updatedBlog = await blogService.updateLikes(blog.id, blog.likes + 1)
+      const blogId = blog.id || blog._id;
+      const newLikes = (blog.likes || 0) + 1;
+      const updatedBlog = await blogService.updateLikes(blogId, newLikes)
       setBlogs(blogs.map(b => (b.id !== blog.id ? b : updatedBlog)))
     } catch (error) {
       console.error("couldn't like blog:", error)

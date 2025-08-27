@@ -42,5 +42,13 @@ describe("Blog app", () => {
       const blogsDiv = page.locator(".blog-list");
       await expect(blogsDiv).toContainText("Test Blog");
     });
+
+    test("a new blog can be liked", async ({ page }) => {
+      await createBlog(page, "Test Blog", "Test Author", "https://example.com");
+      const blogDiv = page.locator(".blog", { hasText: "Test Blog" });
+      await blogDiv.getByRole("button", { name: "view" }).click();
+      await blogDiv.getByRole("button", { name: "like" }).click();
+      await expect(blogDiv).toContainText("1 likes");
+    });
   });
 });
