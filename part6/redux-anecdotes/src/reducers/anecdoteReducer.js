@@ -28,9 +28,9 @@ const reducer = (state = initialState, action) => {
         ...anecdoteToVote,
         votes: anecdoteToVote.votes + 1,
       };
-      return state.map((anecdote) =>
-        anecdote.id !== id ? anecdote : updatedAnecdote
-      );
+      return state
+        .map((anecdote) => (anecdote.id !== id ? anecdote : updatedAnecdote))
+        .sort((a, b) => b.votes - a.votes);
     }
     case "NEW_ANECDOTE": {
       const newAnecdote = {
@@ -38,7 +38,7 @@ const reducer = (state = initialState, action) => {
         content: action.payload.content,
         votes: 0,
       };
-      return state.concat(newAnecdote);
+      return state.concat(newAnecdote).sort((a, b) => b.votes - a.votes);
     }
 
     default:
