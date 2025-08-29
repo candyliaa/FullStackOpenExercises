@@ -53,4 +53,18 @@ export const vote = (id) => {
   };
 };
 
+const generateId = () => {
+  return Number((Math.random() * 100000).toFixed(0));
+};
+
+export const createAnecdote = (content) => {
+  return {
+    type: "NEW_ANECDOTE",
+    payload: {
+      content,
+      id: generateId(),
+    },
+  };
+};
+
 export default reducer;
