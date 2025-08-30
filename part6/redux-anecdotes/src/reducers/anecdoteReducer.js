@@ -1,3 +1,5 @@
+import { createSlice, current } from "@reduxjs/toolkit";
+
 const anecdotesAtStart = [
   "If it hurts, do it more often",
   "Adding manpower to a late software project makes it later!",
@@ -7,64 +9,46 @@ const anecdotesAtStart = [
   "Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.",
 ];
 
-const getId = () => (100000 * Math.random()).toFixed(0);
+const generateId = () => {
+  return (100000 * Math.random()).toFixed(0);
+};
 
 const asObject = (anecdote) => {
   return {
     content: anecdote,
-    id: getId(),
+    id: generateId(),
     votes: 0,
   };
 };
 
 const initialState = anecdotesAtStart.map(asObject);
 
-const anecdoteReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case "INCREASE_VOTE": {
-      const id = action.payload.id;
-      const anecdoteToVote = state.find((anecdote) => anecdote.id === id);
-      const updatedAnecdote = {
-        ...anecdoteToVote,
-        votes: anecdoteToVote.votes + 1,
+const anecdoteSlice = createSlice({
+  name: "anecdotes",
+  initialState,
+  reducers: {
+    createAnecdote(state, action) {
+      const content = action.payload;
+      state.push({
+        content,
+        votes: 0,
+        id: generateId(),
+      });
+    },
+    increaseVote(state, action) {
+      const id = action.payload;
+      const anecdoteToChange = state.find((n) => n.id === id);
+      const changedAnecdote = {
+        ...anecdoteToChange,
+        votes: anecdoteToChange.votes + 1,
       };
       return state
-        .map((anecdote) => (anecdote.id !== id ? anecdote : updatedAnecdote))
+        .map((anecdote) => (anecdote.id !== id ? anecdote : changedAnecdote))
         .sort((a, b) => b.votes - a.votes);
-    }
-    case "NEW_ANECDOTE": {
-      const newAnecdote = {
-        id: action.payload.id,
-        content: action.payload.content,
-        votes: 0,
-      };
-      return state.concat(newAnecdote).sort((a, b) => b.votes - a.votes);
-    }
-
-    default:
-      return state;
-  }
-};
-
-export const vote = (id) => {
-  return {
-    type: "INCREASE_VOTE",
-    payload: { id },
-  };
-};
-
-const generateId = () => {
-  return Number((Math.random() * 100000).toFixed(0));
-};
-
-export const createAnecdote = (content) => {
-  return {
-    type: "NEW_ANECDOTE",
-    payload: {
-      content,
-      id: generateId(),
     },
-  };
-};
+  },
+});
 
-export default anecdoteReducer;
+export const { createAnecdote, increaseVote } = anecdoteSlice.actions;
+
+export default anecdoteSlice.reducer;
