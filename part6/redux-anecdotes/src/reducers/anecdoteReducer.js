@@ -49,7 +49,6 @@ export const increaseVote = (anecdote) => {
       votes: anecdote.votes + 1,
     };
     const saved = await anecdoteService.voteOn(anecdote.id, updatedAnecdote);
-    console.log(saved);
     dispatch(updateAnecdote(saved));
   };
 };
