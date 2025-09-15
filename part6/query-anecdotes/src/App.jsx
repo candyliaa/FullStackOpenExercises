@@ -22,7 +22,7 @@ const App = () => {
     notificationDispatch({ type: "SET", payload: message })
 
     setTimeout(() => {
-      dispatchEvent({ type: "CLEAR" })
+      notificationDispatch({ type: "CLEAR" })
     }, 5000)
   }
 
@@ -34,6 +34,9 @@ const App = () => {
       queryClient.invalidateQueries({ queryKey: ["anecdotes"] })
       showNotification(`new anecdote "${newAnecdote.content}" created`)
     },
+    onError: (error) => {
+      showNotification(error.response.data.error)
+    }
   })
 
   const updateAnecdoteMutation = useMutation({
