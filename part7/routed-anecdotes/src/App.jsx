@@ -36,9 +36,10 @@ const Anecdote = ({ anecdote }) => {
   )
 }
 
-const AnecdoteList = ({ anecdotes }) => (
+const AnecdoteList = ({ anecdotes, notification }) => (
   <div>
     <h2>Anecdotes</h2>
+    <a>{notification}</a>
     <ul>
       {anecdotes.map(anecdote => 
       <li key={anecdote.id} >
@@ -75,6 +76,7 @@ const CreateNew = (props) => {
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
 
+  const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -84,6 +86,8 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+
+    navigate("/anecdotes")
   }
 
   return (
@@ -139,6 +143,9 @@ const App = () => {
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000)
     setAnecdotes(anecdotes.concat(anecdote))
+
+    setNotification(`a new anecdote ${anecdote.content} created!`)
+    setTimeout(() => setNotification(""), 5000)
   }
 
   const anecdoteById = (id) =>
@@ -163,8 +170,8 @@ const App = () => {
       </div>
       <Routes>
         <Route path="/anecdotes/:id" element={<Anecdote anecdote={anecdote} />} />
-        <Route path="/anecdotes" element={<AnecdoteList anecdotes={anecdotes} />} />
-        <Route path="/create" element={<CreateNew />} />
+        <Route path="/anecdotes" element={<AnecdoteList anecdotes={anecdotes} notification={notification} />} />
+        <Route path="/create" element={<CreateNew addNew={addNew}/>} />
         <Route path="/about" element={<About />} />
         <Route path="/" element={<AnecdoteList anecdotes={anecdotes} />} />
       </Routes>
