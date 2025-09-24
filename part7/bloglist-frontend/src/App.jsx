@@ -7,13 +7,15 @@ import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
 import "./index.css";
 import { useNotification } from "./context/NotificationContext";
+import { useUser } from "./context/UserContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const App = () => {
   const [, dispatch] = useNotification();
+  const [user, userDispatch] = useUser();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
   const [newBlogTitle, setNewBlogTitle] = useState("");
   const [newBlogAuthor, setNewBlogAuthor] = useState("");
   const [newBlogUrl, setNewBlogUrl] = useState("");
@@ -46,9 +48,9 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setUser(user);
+      userDispatch({ type: "LOGIN", payload: user });
     }
-  }, []);
+  }, [userDispatch]);
 
   const addBlog = async (blogObject) => {
     try {
@@ -114,14 +116,16 @@ const App = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-
     try {
-      const user = await loginService.login({ username });
-      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
-      setUser(user);
+      const loggedUser = await loginService.login({ username, password });
+      window.localStorage.setItem(
+        "loggedBlogappUser",
+        JSON.stringify(loggedUser)
+      );
+      userDispatch({ type: "LOGIN", payload: loggedUser });
       setUsername("");
+      setPassword("");
     } catch (error) {
-      console.error(error.response?.data || error.message);
       dispatch({
         type: "SET_NOTIFICATION",
         payload: "error: wrong username or password",
@@ -132,7 +136,7 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.removeItem("loggedBlogappUser");
-    setUser(null);
+    userDispatch({ type: "LOGOUT" });
   };
 
   if (res.isLoading) return <div>loading data...</div>;
