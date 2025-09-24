@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "start:test": "cross-env NODE_ENV=test node --watch index.js"
+    "start:test": "cross-env NODE_ENV=test node --watch index.js",
+    "server": "json-server -p3001 --watch db.json"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",
@@ -31,6 +32,7 @@
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "jsdom": "^26.1.0",
+    "json-server": "^1.0.0-beta.3",
     "vite": "^6.0.5",
     "vitest": "^3.2.4"
   }
