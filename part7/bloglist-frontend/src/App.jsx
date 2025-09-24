@@ -6,12 +6,13 @@ import Notification from "./components/Notification";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
 import "./index.css";
+import { useNotification } from "./context/NotificationContext";
 
 const App = () => {
+  const [, dispatch] = useNotification();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [message, setMessage] = useState(null);
   const [newBlogTitle, setNewBlogTitle] = useState("");
   const [newBlogAuthor, setNewBlogAuthor] = useState("");
   const [newBlogUrl, setNewBlogUrl] = useState("");
@@ -43,20 +44,24 @@ const App = () => {
     try {
       const returnedBlog = await blogService.create(blogObject);
       setSortedBlogs(blogs.concat(returnedBlog));
-      setMessage(
-        `a new blog ${blogObject.title} by ${blogObject.author} added`
-      );
-      setTimeout(() => setMessage(null), 5000);
+      dispatch({
+        type: "SET_NOTIFICATION",
+        payload: `a new blog ${blogObject.title} added`,
+      });
       setNewBlogTitle("");
       setNewBlogAuthor("");
       setNewBlogUrl("");
+      setTimeout(() => dispatch({ type: "CLEAR_NOTIFICATION" }), 5000);
     } catch (error) {
       console.error(
         "unable to create blog:",
         error.response?.data || error.message
       );
-      setMessage("error: blog missing either title or url");
-      setTimeout(() => setMessage(null), 5000);
+      dispatch({
+        type: "SET_NOTIFICATION",
+        payload: "error: blog missing either title or url",
+      });
+      setTimeout(() => dispatch({ type: "CLEAR_NOTIFICATION" }), 5000);
     }
   };
 
@@ -99,10 +104,11 @@ const App = () => {
       setPassword("");
     } catch (error) {
       console.error(error.response?.data || error.message);
-      setMessage("error: wrong username or password");
-      setTimeout(() => {
-        setMessage(null);
-      }, 5000);
+      dispatch({
+        type: "SET_NOTIFICATION",
+        payload: "error: wrong username or password",
+      });
+      setTimeout(() => dispatch({ type: "CLEAR_NOTIFICATION" }), 5000);
     }
   };
 
@@ -161,7 +167,6 @@ const App = () => {
           blog={blog}
           blogs={blogs}
           setBlogs={setSortedBlogs}
-          setMessage={setMessage}
           handleLike={handleLike}
           user={user}
         />
@@ -178,7 +183,7 @@ const App = () => {
   if (user === null) {
     return (
       <div>
-        <Notification message={message} />
+        <Notification />
         <h2>Log in to application</h2>
         {loginForm()}
       </div>
@@ -189,7 +194,7 @@ const App = () => {
     <div>
       {logOutButton()}
       <h1>Blogs</h1>
-      <Notification message={message} />
+      <Notification />
       {blogForm()}
       {showBlogs()}
     </div>
