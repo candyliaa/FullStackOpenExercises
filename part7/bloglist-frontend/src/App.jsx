@@ -7,6 +7,7 @@ import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
 import "./index.css";
 import { useNotification } from "./context/NotificationContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const App = () => {
   const [, dispatch] = useNotification();
@@ -17,19 +18,29 @@ const App = () => {
   const [newBlogAuthor, setNewBlogAuthor] = useState("");
   const [newBlogUrl, setNewBlogUrl] = useState("");
 
-  const [blogs, setBlogs] = useState([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    blogService
-      .getAll()
-      .then((blogs) =>
-        setBlogs(
-          blogs
-            .map((b) => ({ ...b, id: b.id || b._id.toString() }))
-            .sort((a, b) => b.likes - a.likes)
-        )
-      );
-  }, []);
+  const res = useQuery({
+    queryKey: ["blogs"],
+    queryFn: () => blogService.getAll(),
+  });
+
+  const addBlogMutation = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: () => queryClient.invalidateQueries(["blogs"]),
+  });
+
+  const likeBlogMutation = useMutation({
+    mutationFn: ({ id, likes }) => blogService.updateLikes(id, likes),
+    onSuccess: () => queryClient.invalidateQueries(["blogs"]),
+  });
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: (id) => blogService.deleteBlog(id),
+    onSuccess: () => queryClient.invalidateQueries(["blogs"]),
+  });
+
+  const blogs = res.data;
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
@@ -42,8 +53,7 @@ const App = () => {
 
   const addBlog = async (blogObject) => {
     try {
-      const returnedBlog = await blogService.create(blogObject);
-      setSortedBlogs(blogs.concat(returnedBlog));
+      addBlogMutation.mutate(blogObject);
       dispatch({
         type: "SET_NOTIFICATION",
         payload: `a new blog ${blogObject.title} added`,
@@ -65,10 +75,6 @@ const App = () => {
     }
   };
 
-  const setSortedBlogs = (blogs) => {
-    setBlogs(blogs.sort((a, b) => b.likes - a.likes));
-  };
-
   const handleBlogTitleChange = async (event) => {
     setNewBlogTitle(event.target.value);
   };
@@ -82,13 +88,27 @@ const App = () => {
   };
 
   const handleLike = async (blog) => {
-    try {
-      const blogId = blog.id || blog._id;
-      const newLikes = (blog.likes || 0) + 1;
-      const updatedBlog = await blogService.updateLikes(blogId, newLikes);
-      setSortedBlogs(blogs.map((b) => (b.id !== blog.id ? b : updatedBlog)));
-    } catch (error) {
-      console.error("couldn't like blog:", error);
+    likeBlogMutation.mutate({ id: blog.id, likes: blog.likes + 1 });
+  };
+
+  const handleDelete = (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      deleteBlogMutation.mutate(blog.id, {
+        onSuccess: () => {
+          dispatch({
+            type: "SET_NOTIFICATION",
+            payload: `deleted blog ${blog.title} by ${blog.author}`,
+          });
+          setTimeout(() => dispatch({ type: "CLEAR_NOTIFICATION" }), 5000);
+        },
+        onError: () => {
+          dispatch({
+            type: "SET_NOTIFICATION",
+            payload: "error: can't delete blog",
+          });
+          setTimeout(() => dispatch({ type: "CLEAR_NOTIFICATION" }), 5000);
+        },
+      });
     }
   };
 
@@ -116,6 +136,8 @@ const App = () => {
     window.localStorage.removeItem("loggedBlogappUser");
     setUser(null);
   };
+
+  if (res.isLoading) return <div>loading data...</div>;
 
   const loginForm = () => (
     <form onSubmit={handleLogin}>
@@ -161,16 +183,18 @@ const App = () => {
     <div className="blog-list">
       <h2>blogs</h2>
       <p>{user.name} logged in</p>
-      {blogs.map((blog) => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          blogs={blogs}
-          setBlogs={setSortedBlogs}
-          handleLike={handleLike}
-          user={user}
-        />
-      ))}
+      {blogs
+        .slice()
+        .sort((a, b) => b.likes - a.likes)
+        .map((blog) => (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            handleLike={handleLike}
+            handleDelete={handleDelete}
+            user={user}
+          />
+        ))}
     </div>
   );
 

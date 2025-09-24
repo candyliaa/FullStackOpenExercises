@@ -6,7 +6,10 @@
       "author": "Tester Author",
       "url": "https://reactpatterns.com/",
       "likes": 7,
-      "user": { "username": "root", "name": "root" }
+      "user": {
+        "username": "root",
+        "name": "root"
+      }
     },
     {
       "id": "2",
@@ -14,15 +17,14 @@
       "author": "Edsger W. Dijkstra",
       "url": "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
       "likes": 5,
-      "user": { "username": "ada", "name": "Ada Lovelace" }
+      "user": {
+        "username": "ada",
+        "name": "Ada Lovelace"
+      }
     },
     {
-      "id": "3",
-      "title": "Canonical string reduction",
-      "author": "Edsger W. Dijkstra",
-      "url": "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-      "likes": 12,
-      "user": { "username": "Test1", "name": "Test Person1" }
+      "likes": 13,
+      "id": "3"
     },
     {
       "id": "4",
@@ -30,7 +32,16 @@
       "author": "Robert C. Martin",
       "url": "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
       "likes": 10,
-      "user": { "username": "Test2", "name": "Test Person2" }
+      "user": {
+        "username": "Test2",
+        "name": "Test Person2"
+      }
+    },
+    {
+      "id": "f4c3",
+      "title": "dfgydfg",
+      "author": "fyjtyj",
+      "url": "werwer"
     }
   ],
   "users": [
