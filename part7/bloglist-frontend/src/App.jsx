@@ -47,13 +47,13 @@ const App = () => {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
       setUser(user);
-      blogService.setToken(user.token);
     }
   }, []);
 
   const addBlog = async (blogObject) => {
     try {
-      addBlogMutation.mutate(blogObject);
+      const blogWithUser = { ...blogObject, user };
+      addBlogMutation.mutate(blogWithUser);
       dispatch({
         type: "SET_NOTIFICATION",
         payload: `a new blog ${blogObject.title} added`,
@@ -116,12 +116,10 @@ const App = () => {
     event.preventDefault();
 
     try {
-      const user = await loginService.login({ username, password });
+      const user = await loginService.login({ username });
       window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
-      blogService.setToken(user.token);
       setUser(user);
       setUsername("");
-      setPassword("");
     } catch (error) {
       console.error(error.response?.data || error.message);
       dispatch({
