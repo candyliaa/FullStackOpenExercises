@@ -5,10 +5,12 @@ import loginService from "./services/login";
 import Notification from "./components/Notification";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
+import Users from "./components/Users";
 import "./index.css";
 import { useNotification } from "./context/NotificationContext";
 import { useUser } from "./context/UserContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Routes, Route, Link } from "react-router-dom";
 
 const App = () => {
   const [, dispatch] = useNotification();
@@ -218,11 +220,25 @@ const App = () => {
 
   return (
     <div>
-      {logOutButton()}
-      <h1>Blogs</h1>
+      <nav>
+        <Link to="/">Blogs</Link> | <Link to="/users">Users</Link>
+        {logOutButton()}
+      </nav>
+
       <Notification />
-      {blogForm()}
-      {showBlogs()}
+
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              {blogForm()}
+              {showBlogs()}
+            </>
+          }
+        />
+        <Route path="/users" element={<Users blogs={blogs} />} />
+      </Routes>
     </div>
   );
 };
