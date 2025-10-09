@@ -4,8 +4,8 @@ import { randomUUID } from 'crypto'
 import mongoose from 'mongoose'
 import 'dotenv/config'
 
-import Book from './src/models/Book.js'
-import Author from './src/models/Author.js'
+import Book from './models/Book.js'
+import Author from './models/Author.js'
 import { GraphQLError } from 'graphql'
 
 mongoose.set('strictQuery', false)
@@ -149,28 +149,25 @@ const resolvers = {
       const authors = await Author.find({});
       return authors.length;
     },
-    allBooks: (root, args) => { 
-        if (!args.author && !args.genre) {
-            return Book.find({});
+    allBooks: async (root, args) => {
+      let filter = {}
+      if (args.author) {
+        const author = await Author.findOne({ name: args.author });
+        if (author) {
+          filter.author = author._id;
+        } else {
+          return [];
         }
-        else if (!args.genre) {
-            return Book.find({ author: args.author });
-        }
-        else {
-            return Book.find({ genre: args.genre });
-        }
-    },
+      }
+      if (args.genre) {
+        filter.genres = args.genre;
+      }
 
+      return await Book.find(filter);
+    },
     allAuthors: async () => {
         const authors = await Author.find({});
-        const books = await Book.find({});
-
-        return authors.map(author => ({
-          name: author.name,
-          born: author.born,
-          id: author._id,
-          bookCount: books.filter(book => book.author.toString() === author._id.toString()).length
-        }))
+        return authors;
     },
   },
   Mutation: {
@@ -223,15 +220,29 @@ const resolvers = {
         }
       },
     
-    editAuthor: (root, args) => {
-        const author = authors.find(a => a.name === args.name)
+    editAuthor: async (root, args) => {
+        const author = await Author.findOne({ name: args.name })
         if (!author) {
-            return null
+          throw new GraphQLError('author does not exist', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.name,
+            }
+          })
         }
-
-        const updatedAuthor = { ...author, born: args.setBornTo}
-        authors = authors.map(a => a.name === args.name ? updatedAuthor : a)
-        return updatedAuthor
+        try {
+          author.born = args.setBornTo;
+          await author.save();
+          return author
+        } catch(error) {
+          throw new GraphQLError('changing author birth year failed', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.setBornTo,
+              error
+            }
+          })
+        }
       }
     },
     Author: {
