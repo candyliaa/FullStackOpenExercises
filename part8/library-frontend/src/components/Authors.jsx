@@ -20,6 +20,10 @@ const Authors = (props) => {
     return <div>loading...</div>
   }
 
+  if (result.error) {
+    return <div>error: {result.error.message}</div>
+  }
+
   const authors = result.data.allAuthors
 
   const submit = async (event) => {
